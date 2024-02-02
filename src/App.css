@@ -116,3 +116,12 @@
 	background-clip: text;
 	text-fill-color: transparent;
 }
+
+input {
+	height: 20px;
+}
+
+button {
+	margin-top: 10px;
+	border: 1px solid #888 !important;
+}
