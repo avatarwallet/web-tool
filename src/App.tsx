@@ -19,10 +19,10 @@ import {
 } from '@avatarwallet/config';
 import { parseError } from '@avatarwallet/cross-platform-tools';
 
-const awtWeb: AwtWebSDK = new AwtWebSDK({ env: Env.local });
-
-let tgWallet: Wallet;
-
+const awtWeb: AwtWebSDK = new AwtWebSDK({
+	env: Env.development,
+	defaultNetworkId: 97,
+});
 const KEY = 'demo-key';
 const PASSWORD = '123456';
 const chainId = 11155111;
@@ -34,8 +34,6 @@ const sepoliaConfig: RelayerConfig = devContext[chainId];
 
 const salt =
 	'0xb25165d8d83d96960019512ded4c12a03b27696c5c911eb9ae92049d1c2bc5b8';
-
-const param: WalletCrypto = { storageKey: KEY, password: PASSWORD, provider };
 
 const testTxs: AwtTransaction[] = [
 	{
@@ -194,107 +192,10 @@ function App() {
 	// 		divHTML.innerHTML = innerHtml;
 	// 		document.body.appendChild(divHTML);
 	// 	};
-	const tgWalletSendTx = async () => {
-		try {
-			const sign = await fetch('/rpc/minimal/relayer/feeOptions', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					chainId,
-					address: eoaAddress,
-					salt,
-					txs: testTxs,
-					spaceNum: '0',
-					data: '',
-				}),
-			});
-			const body = await sign.json();
-			const feeData = body?.data;
-			const message = body?.message;
-			if (!feeData && message && message.startsWith('0x')) {
-				let _error = parseError(message);
-				_error =
-					typeof _error === 'string'
-						? _error
-						: _error?._reason || _error?.errName;
-				console.log('_error', _error);
-				return;
-			}
-			const value = feeData?.list[0]?.value.mid;
-			const { spaceNum, nonce } = feeData?.nonceInfo || {};
-			const txs: AwtTransaction[] = [
-				{
-					callType: '0',
-					revertOnError: true,
-					gasLimit: '0',
-					target: sepoliaConfig.contracts.refundAddress,
-					value: value,
-					data: '0x',
-				},
-				...testTxs,
-			];
-			console.log('txs', txs, spaceNum, nonce, tgWallet, chainId);
-			const tgWalletLocalSign = await signTxByLocal({
-				space: Number(spaceNum),
-				nonce: Number(nonce),
-				signer: tgWallet,
-				txs,
-				chainId,
-				walletAddress: tgAddress,
-			});
-			console.log('tgWalletLocalSign', tgWalletLocalSign);
-			const txResultJson = await fetch('/rpc/minimal/relayer/invoke', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					nonce,
-					spaceNum,
-					address: eoaAddress,
-					salt,
-					signature: tgWalletLocalSign,
-					txs,
-					chainId,
-					speedRate: 1.3,
-				}),
-			});
-			const txResult = await txResultJson.json();
 
-			const _message = txResult.message;
-
-			console.log('txResult', _message);
-		} catch (error) {
-			console.log('tgWalletSendTx error', error);
-		}
-	};
-	const initTgWallet = async () => {
-		try {
-			let wallet = recoverWallet(param);
-			if (!wallet) {
-				wallet = createRandom(param) as Wallet;
-			}
-			tgWallet = wallet as Wallet;
-			const _eoaAddress = wallet?.address as string;
-			console.log('_eoaAddress', _eoaAddress);
-			const _tgAddress = getUserAddressByLocal(
-				_eoaAddress,
-				salt,
-				sepoliaConfig.contracts.erc2470Factory,
-				sepoliaConfig.contracts.tgBaseWalletImpl
-			);
-			setEoaAddress(_eoaAddress);
-			setTgAddress(_tgAddress);
-		} catch (error) {
-			console.log('initTgWallet', error);
-		}
-	};
 	useEffect(() => {
 		const isCon = awtWeb.isConnected();
 		setIsConnected(isCon);
-		initTgWallet();
 	}, [account]);
 	return (
 		<>
@@ -319,10 +220,6 @@ function App() {
 						sendTx
 					</div>
 				</div>
-				<h2>tg wallet function</h2>
-				<h5>tgEoaAddress:{eoaAddress}</h5>
-				<h5>tgWalletAddress:{tgAddress}</h5>
-				<h5 onClick={tgWalletSendTx}>Send tg Tx</h5>
 			</div>
 		</>
 	);
