@@ -10,9 +10,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@avatarwallet/config": "^1.1.0-beta.39",
-		"@avatarwallet/cross-platform-tools": "^1.0.0",
-		"@avatarwallet/web-sdk": "1.1.0-beta.100",
+		"@avatarwallet/web-sdk": "1.1.0-beta.115",
 		"@esbuild-plugins/node-globals-polyfill": "^0.2.3",
 		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
 		"ethers": "^6.6.2",

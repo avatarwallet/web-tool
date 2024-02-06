@@ -4,34 +4,26 @@ import {
 	AwtWebSDK,
 	Env,
 	AwtAccount,
-	createRandom,
-	recoverWallet,
-	getUserAddressByLocal,
-	signTxByLocal,
-	AwtTransaction,
-	WalletCrypto,
 	WalletConfig,
 } from '@avatarwallet/web-sdk';
 import { ethers, Wallet } from 'ethers';
-import {
-	context,
-	Env as ContextEnv,
-	RelayerConfig,
-} from '@avatarwallet/config';
-import { parseError } from '@avatarwallet/cross-platform-tools';
 
 const BSC = 56,
-	BSC_TEST = 97;
+	BSC_TEST = 97,
+	opBNB = 204,
+	opBNB_TEST = 5611;
 
 const awtWeb: AwtWebSDK = new AwtWebSDK({
-	env: Env.development,
-	defaultNetworkId: BSC_TEST,
+	env: Env.production,
+	defaultNetworkId: opBNB,
 });
 
 function App() {
 	const [account, setAccount] = useState<AwtAccount | null>(null);
 	const [isConnected, setIsConnected] = useState<boolean>(false);
 	const [message, setMessage] = useState<string>('');
+	const [signature, setSignature] = useState<string>('');
+	const [txId, setTxId] = useState<string>('');
 	const [receiveAddress, setReceiveAddress] = useState<string>('');
 
 	const connect = async () => {
@@ -59,8 +51,8 @@ function App() {
 	const signMessage = async () => {
 		try {
 			console.log(awtWeb.getAccount());
-			const sign = await awtWeb.signMessage(message);
-			console.log('sign', sign);
+			const _signature = await awtWeb.signMessage(message);
+			setSignature(_signature);
 		} catch (error) {
 			console.log('signMessage error', error);
 		}
@@ -71,7 +63,7 @@ function App() {
 				alert('Please enter the ETH address');
 				return;
 			}
-			const sign = await awtWeb.sendTransaction([
+			const _txid = await awtWeb.sendTransaction([
 				{
 					callType: '0',
 					revertOnError: false,
@@ -81,7 +73,7 @@ function App() {
 					data: '0x',
 				},
 			]);
-			console.log('sendTx', sign);
+			setTxId(_txid);
 		} catch (error) {
 			console.log('sendTx error', error);
 		}
@@ -97,17 +89,6 @@ function App() {
 		setAccount(_account || null);
 	}, []);
 
-	useEffect(() => {
-		const _config = awtWeb.getWalletConfig();
-		if (
-			(_config.env === Env.production &&
-				_config.defaultNetworkId === 97) ||
-			(_config.env === Env.development && _config.defaultNetworkId === 56)
-		) {
-			awtWeb.disconnect();
-			setAccount(null);
-		}
-	}, []);
 	return (
 		<>
 			<div className="">
@@ -130,11 +111,8 @@ function App() {
 					) : (
 						<button onClick={connect}>connect wallet</button>
 					)}
-
 					<br />
-
 					<br />
-
 					<input
 						type="text"
 						style={{ width: '500px' }}
@@ -145,8 +123,17 @@ function App() {
 					<br />
 					<button onClick={signMessage}>signMessage</button>
 					<br />
+					signature:
 					<br />
-
+					{signature && (
+						<textarea
+							style={{ width: '500px' }}
+							value={`${signature}`}
+							rows={10}
+						/>
+					)}
+					<br />
+					<br />
 					<input
 						type="text"
 						style={{ width: '500px' }}
@@ -157,6 +144,13 @@ function App() {
 					<br />
 					<button onClick={sendTx}>Send 0.00001 Nataive token</button>
 					<br />
+					{txId && (
+						<span>
+							txId:
+							<br />
+							{txId}
+						</span>
+					)}
 				</div>
 			</div>
 		</>

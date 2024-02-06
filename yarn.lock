@@ -12,10 +12,10 @@
   resolved "https://registry.npmjs.org/@adraffy/ens-normalize/-/ens-normalize-1.9.2.tgz"
   integrity sha512-0h+FrQDqe2Wn+IIGFkTCd4aAwTJ+7834Ek1COohCyV26AXhwQ7WQaz+4F/nLOeVl/3BtWHOHLPsq46V8YB46Eg==
 
-"@avatarwallet/config@1.1.0-beta.93":
-  version "1.1.0-beta.93"
-  resolved "https://registry.yarnpkg.com/@avatarwallet/config/-/config-1.1.0-beta.93.tgz#a555c95731ca1b77cfef93d0cd186d8badd070c2"
-  integrity sha512-LaX67a7o/FpWV5TG6ewfbj1vW7g+xRPuJPY3WxGUV/mTTfrMk6YBZNaMzMnhvvJCfUv473AOrD5UB3hDjaK2LA==
+"@avatarwallet/config@1.1.0-beta.111":
+  version "1.1.0-beta.111"
+  resolved "https://registry.npmjs.org/@avatarwallet/config/-/config-1.1.0-beta.111.tgz#ca79c01b536bc3a59f11a9b545eeab98909d320f"
+  integrity sha512-PrVRRlKohst7adaZUu0eIcUwdGt1HoXBw2eoql0eKBUppsyKGvTsM0aCcBzwmndneVNht3GoNErZH2yjRTRHTw==
   dependencies:
     axios "^1.4.0"
 
@@ -41,12 +41,12 @@
     axios "^1.4.0"
     ethers "^6.2.3"
 
-"@avatarwallet/web-sdk@1.1.0-beta.100":
-  version "1.1.0-beta.100"
-  resolved "https://registry.yarnpkg.com/@avatarwallet/web-sdk/-/web-sdk-1.1.0-beta.100.tgz#59c3b9664b01084e727015a5f31b90e3340ccc44"
-  integrity sha512-f3qYO0Bv2T4fZrPtK79lzFIxSQ/3iDHrSUBsv4fVNt/tUGuTrBGRm3cUUazsJaxBk+j1j1dxz9QlaXoohAyj3w==
+"@avatarwallet/web-sdk@1.1.0-beta.115":
+  version "1.1.0-beta.115"
+  resolved "https://registry.npmjs.org/@avatarwallet/web-sdk/-/web-sdk-1.1.0-beta.115.tgz#99bcff6f24ca28060eed382cb2075a649993c531"
+  integrity sha512-tcU6yJW/w36JZwR1tkOHb8O4uF+2kv5mhIyiqAqcFE793GaP5agTIUauv3MJOFIYhCO0G3atnIgSmiwU5jSGDA==
   dependencies:
-    "@avatarwallet/config" "1.1.0-beta.93"
+    "@avatarwallet/config" "1.1.0-beta.111"
     "@avatarwallet/contract" "1.1.0-beta.33"
     big.js "^6.2.1"
     body-scroll-lock "^4.0.0-beta.0"
