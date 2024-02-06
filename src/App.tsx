@@ -2,28 +2,28 @@ import { useEffect, useState } from 'react';
 import './App.css';
 import {
 	AwtWebSDK,
-	Env,
 	AwtAccount,
 	WalletConfig,
+	getNonceHashByTxs,
+	encodeNonce,
 } from '@avatarwallet/web-sdk';
-import { ethers, Wallet } from 'ethers';
-
-const BSC = 56,
-	BSC_TEST = 97,
-	opBNB = 204,
-	opBNB_TEST = 5611;
+import { env, chainId, chainContext, provider } from './chain.config';
+import { PrepareTxs, initWallet } from './util';
+import { Erc20__factory } from '@avatarwallet/contract';
+import { ethers } from 'ethers';
 
 const awtWeb: AwtWebSDK = new AwtWebSDK({
-	env: Env.production,
-	defaultNetworkId: opBNB,
+	env: env,
+	defaultNetworkId: chainId,
 });
 
 function App() {
 	const [account, setAccount] = useState<AwtAccount | null>(null);
 	const [isConnected, setIsConnected] = useState<boolean>(false);
-	const [message, setMessage] = useState<string>('');
-	const [signature, setSignature] = useState<string>('');
+	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [txId, setTxId] = useState<string>('');
+	const [tokenAddress, setTokenAddress] = useState<string>('');
+	const [tokenAmount, setTokenAmount] = useState<string>('');
 	const [receiveAddress, setReceiveAddress] = useState<string>('');
 
 	const connect = async () => {
@@ -32,9 +32,11 @@ function App() {
 				logo: '',
 				name: 'demo',
 			});
+			ac;
 			if (ac) {
 				setAccount(ac);
 			}
+
 			console.log('account', ac);
 		} catch (error) {
 			console.log('connect error', error);
@@ -48,35 +50,87 @@ function App() {
 			console.log('disconnect error', error);
 		}
 	};
-	const signMessage = async () => {
-		try {
-			console.log(awtWeb.getAccount());
-			const _signature = await awtWeb.signMessage(message);
-			setSignature(_signature);
-		} catch (error) {
-			console.log('signMessage error', error);
-		}
-	};
+
 	const sendTx = async () => {
 		try {
-			if (!ethers.isAddress(receiveAddress)) {
+			if (isLoading) return;
+			setIsLoading(true);
+			if (
+				!ethers.isAddress(receiveAddress) ||
+				!ethers.isAddress(tokenAddress)
+			) {
 				alert('Please enter the ETH address');
 				return;
 			}
-			const _txid = await awtWeb.sendTransaction([
+			const address = account?.address as string;
+			const sub = account?.sub as string;
+			const iss = account?.iss as string;
+			const path = account?.walletPath as string;
+
+			const walletStatu = await initWallet(address as string);
+
+			const erc20Contract = Erc20__factory.connect(
+				tokenAddress,
+				provider as any
+			);
+			const decimals = await erc20Contract.decimals();
+			const calldata =
+				Erc20__factory.createInterface().encodeFunctionData(
+					'transfer',
+					[
+						receiveAddress,
+						Number(tokenAmount) * 10 ** Number(decimals),
+					]
+				);
+
+			const txs = [
 				{
 					callType: '0',
 					revertOnError: false,
 					gasLimit: '0',
-					target: receiveAddress,
-					value: String(0.00001 * 10 ** 18),
-					data: '0x',
+					target: tokenAddress,
+					value: '0',
+					data: calldata,
 				},
-			]);
-			setTxId(_txid);
+			];
+			const [nonceHash, metaHash] = getNonceHashByTxs({
+				address: address,
+				txs: txs,
+				spaceNumber: 0,
+				spaceNonce: walletStatu.nonce,
+				chainId,
+			});
+			const signature = await awtWeb.signTransaction(nonceHash);
+
+			const txParams = await PrepareTxs(
+				chainContext.contracts.baseWalletImpl,
+				chainContext.contracts.avatarFactory,
+				sub,
+				iss,
+				path,
+				txs,
+				signature,
+				encodeNonce(0, walletStatu.nonce),
+				address,
+				walletStatu.isDeployed
+			);
+			const ethereum = new ethers.BrowserProvider(window.ethereum);
+			const signer = await ethereum.getSigner();
+			const network = await ethereum.getNetwork();
+			if (Number(network.chainId) !== chainId) {
+				await ethereum.send('wallet_switchEthereumChain', [
+					{ chainId: `0x${chainId.toString(16)}` },
+				]);
+			}
+			const tx = await signer.sendTransaction({
+				to: txParams.to,
+				data: txParams.data,
+			});
+			setTxId(tx.hash);
 		} catch (error) {
 			console.log('sendTx error', error);
 		}
+		setIsLoading(false);
 	};
 
 	useEffect(() => {
@@ -93,16 +147,12 @@ function App() {
 		<>
 			<div className="">
 				<div>
-					<h1>Avatarwallet Web Sdk Demo</h1>
+					<h1>Avatarwallet Web Tool</h1>
 					<div className="">isConnected :{String(isConnected)}</div>
 					<div className="">
-						address :{account?.address} <br />
-						email :{account?.email} <br />
-						loginType :{account?.loginType} <br />
-						chainId :{
-							awtWeb.getWalletConfig().defaultNetworkId
-						}{' '}
-						<br />
+						Address :{account?.address} <br />
+						Avatar wallet chainId :
+						{awtWeb.getWalletConfig().defaultNetworkId} <br />
 					</div>
 					<br />
 					<br />
@@ -116,22 +166,19 @@ function App() {
 					<input
 						type="text"
 						style={{ width: '500px' }}
-						placeholder="Message"
-						value={message}
-						onChange={(e) => setMessage(e.target.value)}
+						placeholder="Token address"
+						value={tokenAddress}
+						onChange={(e) => setTokenAddress(e.target.value)}
 					/>
 					<br />
-					<button onClick={signMessage}>signMessage</button>
 					<br />
-					signature:
-					<br />
-					{signature && (
-						<textarea
-							style={{ width: '500px' }}
-							value={`${signature}`}
-							rows={10}
-						/>
-					)}
+					<input
+						type="text"
+						style={{ width: '500px' }}
+						placeholder="Token amount"
+						value={tokenAmount}
+						onChange={(e) => setTokenAmount(e.target.value)}
+					/>
 					<br />
 					<br />
 					<input
@@ -142,7 +189,7 @@ function App() {
 						onChange={(e) => setReceiveAddress(e.target.value)}
 					/>
 					<br />
-					<button onClick={sendTx}>Send 0.00001 Nataive token</button>
+					<button onClick={sendTx}>Send{isLoading && '...'} </button>
 					<br />
 					{txId && (
 						<span>

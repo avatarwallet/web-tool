@@ -10,10 +10,14 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@avatarwallet/web-sdk": "1.1.0-beta.115",
+		"@avatarwallet/config": "1.1.0-beta.113",
+		"@avatarwallet/contract": "1.1.0-beta.31",
+		"@avatarwallet/web-sdk": "1.1.0-beta.120",
 		"@esbuild-plugins/node-globals-polyfill": "^0.2.3",
 		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
+		"@types/lodash": "^4.14.202",
 		"ethers": "^6.6.2",
+		"lodash": "^4.17.21",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"rollup-plugin-node-polyfills": "^0.2.1"

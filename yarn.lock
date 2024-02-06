@@ -19,12 +19,19 @@
   dependencies:
     axios "^1.4.0"
 
-"@avatarwallet/config@^1.1.0-beta.39":
-  version "1.1.0-beta.39"
-  resolved "https://registry.npmjs.org/@avatarwallet/config/-/config-1.1.0-beta.39.tgz"
-  integrity sha512-/+2mDMC0qntFHZT1R97IshDdlS7QEqfYz0S0ChHxWZJNwx132SZ8CZboUYxRKyiQalqcgLTZDaFsb7rQH2wPoA==
+"@avatarwallet/config@1.1.0-beta.113":
+  version "1.1.0-beta.113"
+  resolved "https://registry.npmjs.org/@avatarwallet/config/-/config-1.1.0-beta.113.tgz#39f7a49e51881d05d817e2bd379200c9979ca2df"
+  integrity sha512-Xm9GTTRilFnyb7pWAeybN6vKAAGGyyPTG1k61HixoI5WAT1yDOX/wbQPxVJ1BCzNnsuMmo4ELb0X8XuvOtcDTw==
   dependencies:
     axios "^1.4.0"
+
+"@avatarwallet/contract@1.1.0-beta.31":
+  version "1.1.0-beta.31"
+  resolved "https://registry.npmjs.org/@avatarwallet/contract/-/contract-1.1.0-beta.31.tgz#bacf419729b8720e93585a228348ba7317aa0a3b"
+  integrity sha512-JzZNm7nv+gsYtmrTw6suSE9EWwGrkFx3kCQq8PRryd0WuaceBi6dRAzJKZ8zKWdzhoCV0ll9Qtm7EKFaJ60sjA==
+  dependencies:
+    ethers "^6.8.0"
 
 "@avatarwallet/contract@1.1.0-beta.33":
   version "1.1.0-beta.33"
@@ -33,18 +40,10 @@
   dependencies:
     ethers "^6.8.0"
 
-"@avatarwallet/cross-platform-tools@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/@avatarwallet/cross-platform-tools/-/cross-platform-tools-1.0.0.tgz"
-  integrity sha512-BJuw7Z9hNld83Net7Op0QbDeT4aCudlNkw77TchIU7tG8FfJvkc5b5gK2Fmea/T/MkivY5gJi8Dy/fWlP3OmNQ==
-  dependencies:
-    axios "^1.4.0"
-    ethers "^6.2.3"
-
-"@avatarwallet/web-sdk@1.1.0-beta.115":
-  version "1.1.0-beta.115"
-  resolved "https://registry.npmjs.org/@avatarwallet/web-sdk/-/web-sdk-1.1.0-beta.115.tgz#99bcff6f24ca28060eed382cb2075a649993c531"
-  integrity sha512-tcU6yJW/w36JZwR1tkOHb8O4uF+2kv5mhIyiqAqcFE793GaP5agTIUauv3MJOFIYhCO0G3atnIgSmiwU5jSGDA==
+"@avatarwallet/web-sdk@1.1.0-beta.120":
+  version "1.1.0-beta.120"
+  resolved "https://registry.npmjs.org/@avatarwallet/web-sdk/-/web-sdk-1.1.0-beta.120.tgz#7763245ee7f4f72308d2327d191aaefd09cb436f"
+  integrity sha512-GzdClcwAUIKMiZUIS5zR/x9cDB8hZmdsB0lmMPfCZb7YmtMRWymZX90UGxGjnGOQeSqDItMF4jyZPZ6kLoghxw==
   dependencies:
     "@avatarwallet/config" "1.1.0-beta.111"
     "@avatarwallet/contract" "1.1.0-beta.33"
@@ -341,6 +340,11 @@
   version "7.0.11"
   resolved "https://registry.npmmirror.com/@types/json-schema/-/json-schema-7.0.11.tgz"
   integrity sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==
+
+"@types/lodash@^4.14.202":
+  version "4.14.202"
+  resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.202.tgz#f09dbd2fb082d507178b2f2a5c7e74bd72ff98f8"
+  integrity sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==
 
 "@types/node@18.15.13":
   version "18.15.13"
@@ -800,7 +804,7 @@ esutils@^2.0.2:
   resolved "https://registry.npmmirror.com/esutils/-/esutils-2.0.3.tgz"
   integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
 
-ethers@^6.2.3, ethers@^6.6.2:
+ethers@^6.6.2:
   version "6.6.2"
   resolved "https://registry.npmjs.org/ethers/-/ethers-6.6.2.tgz"
   integrity sha512-vyWfVAj2g7xeZIivOqlbpt7PbS2MzvJkKgsncgn4A/1xZr8Q3BznBmEBRQyPXKCgHmX4PzRQLpnYG7jl/yutMg==
@@ -1082,6 +1086,11 @@ lodash.merge@^4.6.2:
   version "4.6.2"
   resolved "https://registry.npmmirror.com/lodash.merge/-/lodash.merge-4.6.2.tgz"
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
+
+lodash@^4.17.21:
+  version "4.17.21"
+  resolved "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
 loose-envify@^1.1.0:
   version "1.4.0"
