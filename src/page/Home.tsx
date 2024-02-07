@@ -1,50 +1,50 @@
 import { useEffect, useState } from 'react';
-import './App.css';
 import {
-	AwtWebSDK,
-	AwtAccount,
-	WalletConfig,
-	getNonceHashByTxs,
+	getChainContext,
+	getConfigContext,
+	getRPCProvider,
+	getActiveChain,
+	setRPCProvider,
+} from '../chain.config';
+import {
+	PrepareTxs,
+	initWallet,
 	encodeNonce,
-} from '@avatarwallet/web-sdk';
-import { env, chainId, chainContext, provider } from './chain.config';
-import { PrepareTxs, initWallet } from './util';
+	genOAuthURI,
+	getNonceHash,
+	requestOAuth,
+} from '../util';
 import { Erc20__factory } from '@avatarwallet/contract';
 import { ethers } from 'ethers';
+import { useStore } from '../store';
+import { Env, context } from '@avatarwallet/config';
 
-const awtWeb: AwtWebSDK = new AwtWebSDK({
-	env: env,
-	defaultNetworkId: chainId,
-});
-
-function App() {
-	const [account, setAccount] = useState<AwtAccount | null>(null);
+function Home() {
+	const [account, setAccount] = useState<any>(null);
 	const [isConnected, setIsConnected] = useState<boolean>(false);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [txId, setTxId] = useState<string>('');
 	const [tokenAddress, setTokenAddress] = useState<string>('');
 	const [tokenAmount, setTokenAmount] = useState<string>('');
 	const [receiveAddress, setReceiveAddress] = useState<string>('');
-
+	const [chainId, setChainId, env, setEnv] = useStore((state) => [
+		state.chainId,
+		state.setChainId,
+		state.env,
+		state.setEnv,
+	]);
 	const connect = async () => {
 		try {
-			const ac = await awtWeb.connect({
-				logo: '',
-				name: 'demo',
-			});
-			ac;
+			const ac = await requestOAuth('login');
 			if (ac) {
 				setAccount(ac);
 			}
-
-			console.log('account', ac);
 		} catch (error) {
 			console.log('connect error', error);
 		}
 	};
 	const disconnect = async () => {
 		try {
-			awtWeb.disconnect();
 			setAccount(null);
 		} catch (error) {
 			console.log('disconnect error', error);
@@ -65,13 +65,12 @@ function App() {
 			const address = account?.address as string;
 			const sub = account?.sub as string;
 			const iss = account?.iss as string;
-			const path = account?.walletPath as string;
+			const path = account?.path as string;
 
 			const walletStatu = await initWallet(address as string);
-
 			const erc20Contract = Erc20__factory.connect(
 				tokenAddress,
-				provider as any
+				getRPCProvider() as any
 			);
 			const decimals = await erc20Contract.decimals();
 			const calldata =
@@ -79,7 +78,7 @@ function App() {
 					'transfer',
 					[
 						receiveAddress,
-						Number(tokenAmount) * 10 ** Number(decimals),
+						String(Number(tokenAmount) * 10 ** Number(decimals)),
 					]
 				);
 
@@ -93,23 +92,24 @@ function App() {
 					data: calldata,
 				},
 			];
-			const [nonceHash, metaHash] = getNonceHashByTxs({
-				address: address,
-				txs: txs,
-				spaceNumber: 0,
-				spaceNonce: walletStatu.nonce,
-				chainId,
-			});
-			const signature = await awtWeb.signTransaction(nonceHash);
 
+			const [nonceHash, metaHash] = getNonceHash(
+				address,
+				txs,
+				0,
+				walletStatu.nonce,
+				chainId
+			);
+			const res = await requestOAuth('sign', nonceHash);
+			const contracts = getChainContext().contracts;
 			const txParams = await PrepareTxs(
-				chainContext.contracts.baseWalletImpl,
-				chainContext.contracts.avatarFactory,
+				contracts.baseWalletImpl,
+				contracts.avatarFactory,
 				sub,
 				iss,
 				path,
 				txs,
-				signature,
+				res.signature as any,
 				encodeNonce(0, walletStatu.nonce),
 				address,
 				walletStatu.isDeployed
@@ -132,34 +132,69 @@ function App() {
 		}
 		setIsLoading(false);
 	};
-
 	useEffect(() => {
-		const _isConnected = awtWeb.isConnected();
-		setIsConnected(_isConnected);
-	}, [account]);
-
-	useEffect(() => {
-		const _account = awtWeb.getAccount();
-		setAccount(_account || null);
-	}, []);
-
+		env && setRPCProvider(getActiveChain());
+	}, [env]);
 	return (
 		<>
 			<div className="">
 				<div>
 					<h1>Avatarwallet Web Tool</h1>
-					<div className="">isConnected :{String(isConnected)}</div>
-					<div className="">
-						Address :{account?.address} <br />
-						Avatar wallet chainId :
-						{awtWeb.getWalletConfig().defaultNetworkId} <br />
-					</div>
+					<h3 className="">Current env:{env}</h3>
+					<h3 className="">Current selected chainId:{chainId}</h3>
+
 					<br />
+					<label htmlFor="env-select">Choose a env:</label>
+
+					<select
+						name="pets"
+						id="env-select"
+						value={env}
+						onChange={(e) => {
+							setEnv(e.target.value as Env);
+						}}
+					>
+						<option value={Env.development} key={Env.development}>
+							{Env.development}
+						</option>
+						<option value={Env.production} key={Env.production}>
+							{Env.production}
+						</option>
+					</select>
 					<br />
-					{isConnected ? (
-						<button onClick={disconnect}>disconnect</button>
+					<label htmlFor="pet-select">Choose a chain:</label>
+
+					<select
+						name="pets"
+						id="pet-select"
+						value={chainId}
+						onChange={(e) => {
+							setChainId(Number(e.target.value));
+						}}
+					>
+						{getActiveChain().map((network) => {
+							return (
+								<option
+									value={network}
+									key={network}
+								>{`${context[env][network]?.networks?.name} `}</option>
+							);
+						})}
+					</select>
+
+					<br />
+					<h3 className="">
+						AvatarWalletAddress :{account?.address} <br />
+						<br />
+					</h3>
+					{account ? (
+						<button onClick={disconnect}>
+							Disconnect AvatarWallet
+						</button>
 					) : (
-						<button onClick={connect}>connect wallet</button>
+						<button onClick={connect}>
+							Connect AvatarWallet with Google{' '}
+						</button>
 					)}
 					<br />
 					<br />
@@ -189,13 +224,20 @@ function App() {
 						onChange={(e) => setReceiveAddress(e.target.value)}
 					/>
 					<br />
-					<button onClick={sendTx}>Send{isLoading && '...'} </button>
+					<button onClick={sendTx}>
+						Send token with MetaMask {isLoading && '...'}{' '}
+					</button>
 					<br />
 					{txId && (
 						<span>
 							txId:
 							<br />
-							{txId}
+							<a
+								href={`${context[env][chainId]?.networks?.blockBrowseUrl}/tx/${txId}`}
+								target="_blank"
+							>
+								{txId}
+							</a>
 						</span>
 					)}
 				</div>
@@ -204,4 +246,4 @@ function App() {
 	);
 }
 
-export default App;
+export default Home;

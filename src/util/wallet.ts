@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { BytesLike, ethers, BigNumberish } from 'ethers';
 import { ContractFactory } from '@avatarwallet/contract';
-import { chainContext, provider } from './chain.config';
+import { getChainContext, getRPCProvider } from '../chain.config';
 import { JsonRpcProvider } from 'ethers';
 
 export async function initWallet(
@@ -10,11 +10,11 @@ export async function initWallet(
 	let isDeployed = false,
 		nonce = 0;
 	try {
-		const result = await provider.getCode(address);
+		const result = await getRPCProvider().getCode(address);
 		isDeployed = result.toLocaleLowerCase() != '0x';
 		const userWalletContract = ContractFactory.userWalletContract({
 			contractAddress: address,
-			signerOrProvider: provider as any,
+			signerOrProvider: getRPCProvider() as any,
 		});
 		nonce = isDeployed ? Number(await userWalletContract.readNonce(0)) : 0;
 	} catch (error) {
@@ -45,7 +45,7 @@ export async function PrepareTxs(
 	to = walletAddress;
 	const userWalletContract = ContractFactory.userWalletContract({
 		contractAddress: walletAddress,
-		signerOrProvider: provider as any,
+		signerOrProvider: getRPCProvider() as any,
 	});
 	const txNonce = deloyed ? await userWalletContract.readNonce(0) : BigInt(0);
 	data = _.get(
@@ -60,7 +60,7 @@ export async function PrepareTxs(
 		to = awtFactoryContratc;
 		const awtFacContract = ContractFactory.AvatarFactoryContract({
 			contractAddress: to,
-			signerOrProvider: provider as any,
+			signerOrProvider: getRPCProvider() as any,
 		});
 		data = _.get(
 			await awtFacContract.multiCall.populateTransaction([
@@ -72,8 +72,8 @@ export async function PrepareTxs(
 					value: 0,
 					data: _.get(
 						await awtFacContract.createWallet.populateTransaction(
-							`"iss":"${iss}"`,
-							`"sub":"${sub}"`,
+							iss,
+							sub,
 							path,
 							baseWalletImpl
 						),
