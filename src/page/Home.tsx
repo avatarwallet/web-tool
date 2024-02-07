@@ -152,6 +152,7 @@ function Home() {
 						value={env}
 						onChange={(e) => {
 							setEnv(e.target.value as Env);
+							disconnect();
 						}}
 					>
 						<option value={Env.development} key={Env.development}>
