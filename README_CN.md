@@ -16,8 +16,8 @@
 2. 选择你需要操作的链
 3. 点击'Connect AvatarWallet with Google'
 4. 确认 AvatarWalletAddress的正确性
-4. 输入token地址和需要转移的token数量和接收token的地址（发送1usdt,token amount就填1）
-5. 点击'Send token with MetaMask'，在metamask钱包完成后续流程
+5. 输入token地址和需要转移的token数量和接收token的地址（发送1usdt,token amount就填1）
+6. 点击'Send token with MetaMask'，在metamask钱包完成后续流程
 
 ## 错误处理
 ### Audience not allowed

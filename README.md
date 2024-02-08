@@ -20,8 +20,8 @@ yarn dev
 2. Choose the blockchain you need to operate on.
 3. Click 'Connect AvatarWallet with Google'.
 4. Make sure that 'AvatarWalletAddress' is right
-4. Enter the token address, the amount of tokens to transfer, and the recipient's token address.(If you want to send 1 usdt ,token amount is 1.)
-5. Click 'Send token with MetaMask' and complete the subsequent process in your MetaMask wallet.
+5. Enter the token address, the amount of tokens to transfer, and the recipient's token address.(If you want to send 1 usdt ,token amount is 1.)
+6. Click 'Send token with MetaMask' and complete the subsequent process in your MetaMask wallet.
 
 
 ## Error Handling
