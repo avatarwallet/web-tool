@@ -1,6 +1,5 @@
 import { context, Context, Env, ChainId } from '@avatarwallet/config';
 import { ethers } from 'ethers';
-import { atom, useAtom } from 'jotai';
 import { getStore } from './store';
 
 export const getConfigContext = () => context[getStore().env];

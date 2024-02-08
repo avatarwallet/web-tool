@@ -19,6 +19,8 @@ import { ethers } from 'ethers';
 import { useStore } from '../store';
 import { Env, context } from '@avatarwallet/config';
 
+type TokenType = 'native' | 'erc20';
+
 function Home() {
 	const [account, setAccount] = useState<any>(null);
 	const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -27,6 +29,8 @@ function Home() {
 	const [tokenAddress, setTokenAddress] = useState<string>('');
 	const [tokenAmount, setTokenAmount] = useState<string>('');
 	const [receiveAddress, setReceiveAddress] = useState<string>('');
+	const [tokenType, setTokenType] = useState<TokenType>('native');
+
 	const [chainId, setChainId, env, setEnv] = useStore((state) => [
 		state.chainId,
 		state.setChainId,
@@ -50,14 +54,14 @@ function Home() {
 			console.log('disconnect error', error);
 		}
 	};
-
 	const sendTx = async () => {
 		try {
 			if (isLoading) return;
 			setIsLoading(true);
+			const isSendNativeToken = tokenType === 'native';
 			if (
 				!ethers.isAddress(receiveAddress) ||
-				!ethers.isAddress(tokenAddress)
+				(!isSendNativeToken && !ethers.isAddress(tokenAddress))
 			) {
 				alert('Please enter the ETH address');
 				return;
@@ -68,27 +72,36 @@ function Home() {
 			const path = account?.path as string;
 
 			const walletStatu = await initWallet(address as string);
-			const erc20Contract = Erc20__factory.connect(
-				tokenAddress,
-				getRPCProvider() as any
-			);
-			const decimals = await erc20Contract.decimals();
-			const calldata =
-				Erc20__factory.createInterface().encodeFunctionData(
+			let calldata, target, value;
+
+			if (isSendNativeToken) {
+				calldata = '0x';
+				target = receiveAddress;
+				value = ethers.parseEther(tokenAmount);
+			} else {
+				const erc20Contract = Erc20__factory.connect(
+					tokenAddress,
+					getRPCProvider() as any
+				);
+				const decimals = await erc20Contract.decimals();
+				calldata = Erc20__factory.createInterface().encodeFunctionData(
 					'transfer',
 					[
 						receiveAddress,
 						String(Number(tokenAmount) * 10 ** Number(decimals)),
 					]
 				);
+				target = tokenAddress;
+				value = '0';
+			}
 
 			const txs = [
 				{
 					callType: '0',
 					revertOnError: false,
 					gasLimit: '0',
-					target: tokenAddress,
-					value: '0',
+					target,
+					value,
 					data: calldata,
 				},
 			];
@@ -126,6 +139,7 @@ function Home() {
 				to: txParams.to,
 				data: txParams.data,
 			});
+			console.log(tx);
 			setTxId(tx.hash);
 		} catch (error) {
 			console.log('sendTx error', error);
@@ -155,12 +169,10 @@ function Home() {
 							disconnect();
 						}}
 					>
-						<option value={Env.development} key={Env.development}>
+						<option value={Env.development}>
 							{Env.development}
 						</option>
-						<option value={Env.production} key={Env.production}>
-							{Env.production}
-						</option>
+						<option value={Env.production}>{Env.production}</option>
 					</select>
 					<br />
 					<label htmlFor="pet-select">Choose a chain:</label>
@@ -199,13 +211,35 @@ function Home() {
 					)}
 					<br />
 					<br />
-					<input
-						type="text"
-						style={{ width: '500px' }}
-						placeholder="Token address"
-						value={tokenAddress}
-						onChange={(e) => setTokenAddress(e.target.value)}
-					/>
+					<label htmlFor="token-select">
+						Choose the type of tokens sent:
+					</label>
+					<select
+						name="pets"
+						id="token-select"
+						value={tokenType}
+						onChange={(e) =>
+							setTokenType(e.target.value as TokenType)
+						}
+					>
+						<option value="native"> Native token</option>
+						<option value="erc20"> ERC20 token</option>
+					</select>
+					<br />
+					{tokenType === 'erc20' && (
+						<>
+							<br />
+							<input
+								type="text"
+								style={{ width: '500px' }}
+								placeholder="ERC20 Token address"
+								value={tokenAddress}
+								onChange={(e) =>
+									setTokenAddress(e.target.value)
+								}
+							/>
+						</>
+					)}
 					<br />
 					<br />
 					<input
