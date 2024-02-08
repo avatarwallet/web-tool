@@ -1,5 +1,5 @@
 [中文README](./README_CN.md)
-# AvatarWallet  Rescue Web Tool
+# AvatarWallet Web Tool
 
 * This tool allows AvatarWallet users to transfer assets within their wallet without using the official Avatar API. 
 * It is designed for emergency response scenarios, demonstrating the wallet's degree of decentralization.

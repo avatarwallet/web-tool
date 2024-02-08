@@ -1,5 +1,5 @@
 [README_EN](./README.md)
-# AvatarWallet Rescue Web Tool
+# AvatarWallet Web Tool
 
 * 允许AvatarWallet用户在不使用Avatar官方API的情况下，转移钱包内资产。
 * 用于应急响应场景，同时展示钱包的去中心化程度。
