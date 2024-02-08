@@ -18,6 +18,7 @@ import { Erc20__factory } from '@avatarwallet/contract';
 import { ethers } from 'ethers';
 import { useStore } from '../store';
 import { Env, context } from '@avatarwallet/config';
+import { parseError } from '@avatarwallet/cross-platform-tools';
 
 type TokenType = 'native' | 'erc20';
 
@@ -114,6 +115,12 @@ function Home() {
 				chainId
 			);
 			const res = await requestOAuth('sign', nonceHash);
+			if (
+				res.address.toLowerCase() !==
+				(account?.address || '').toLowerCase()
+			) {
+				throw new Error('Google account mismatch!');
+			}
 			const contracts = getChainContext().contracts;
 			const txParams = await PrepareTxs(
 				contracts.baseWalletImpl,
@@ -141,8 +148,19 @@ function Home() {
 			});
 			console.log(tx);
 			setTxId(tx.hash);
-		} catch (error) {
-			console.log('sendTx error', error);
+		} catch (error: any) {
+			let errReason;
+			const errorData = error?.data;
+			if (typeof errorData === 'string' && errorData.startsWith('0x')) {
+				const _error = parseError(errorData);
+				errReason =
+					typeof _error === 'string'
+						? _error
+						: _error?._reason || _error?.errName;
+			} else {
+				errReason = error?.message;
+			}
+			errReason && alert(errReason);
 		}
 		setIsLoading(false);
 	};
